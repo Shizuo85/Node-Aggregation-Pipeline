@@ -8,11 +8,15 @@ const catchAsync = require("./services/catchAsync");
 exports.test = catchAsync(async (req, res, next) => {
     let result = await Person.aggregate([
         {
-            $group: {
-                _id: "$age",
-                count: {$sum: 1}
+            $project: {
+                _id: 0,
+                random: 0
             },
         },
+        {
+            $out: "newCollection"
+        }
+        
     ]);
     res.status(200).json({
         message: "success",
@@ -180,6 +184,47 @@ exports.unwind = catchAsync(async (req, res, next) => {
         {
             $count: "total"
         }
+    ]);
+    res.status(200).json({
+        message: "success",
+        result,
+    });
+});
+
+exports.limitSumAvg = catchAsync(async (req, res, next) => {
+    let result = await Person.aggregate([
+        {
+            $group: {
+                _id: "$age",
+                count: {$sum: 1},
+                total: {$sum: "$age"},
+                avgAge: {
+                    $avg: "$age"
+                }
+            },
+        },
+        {
+            $limit: 10
+        }
+    ]);
+    res.status(200).json({
+        message: "success",
+        result,
+    });
+});
+
+exports.out = catchAsync(async (req, res, next) => {
+    let result = await Person.aggregate([
+        {
+            $project: {
+                _id: 0,
+                random: 0
+            },
+        },
+        {
+            $out: "newCollection"
+        }
+        
     ]);
     res.status(200).json({
         message: "success",
